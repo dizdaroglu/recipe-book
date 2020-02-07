@@ -11,7 +11,9 @@ import UserCook from './screens/CookScreen/UserCook';
 
 
 
+const headerConfig = {
 
+}
 
 const HomeStack = createStackNavigator({
     Home: HomeScreen
@@ -19,6 +21,8 @@ const HomeStack = createStackNavigator({
 
 const AuthStack = createStackNavigator({
     Auth: AuthScreen
+}, {
+    headerMode: 'none'
 })
 const AddCookStack = createStackNavigator({
     AddCook: AddCook
@@ -46,5 +50,5 @@ export default createAppContainer(createSwitchNavigator({
     Auth: AuthStack,
     Splash: SplashScreen
 }, {
-    initialRouteName: 'App'
+    initialRouteName: 'Auth'
 }))

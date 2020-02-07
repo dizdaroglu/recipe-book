@@ -7,7 +7,9 @@ export default class App extends Component {
 
     render() {
         return (
-            <Router />
+            <View style={{ flex: 1, backgroundColor: '#fff' }}>
+                <Router />
+            </View>
         );
     }
 }

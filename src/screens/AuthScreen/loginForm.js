@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Input from '../../utils/form/input';
 import ValidationRules from '../../utils/form/validationRules';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { signIn, signUp } from '../../store/actions/user_actions';
 
-export default class LoginForm extends Component {
+class LoginForm extends Component {
 
     state = {
         type: "Login",
@@ -88,7 +91,14 @@ export default class LoginForm extends Component {
             </View>
             : null
     )
-
+    manageAccess = () => {
+        if (!this.props.User.userData.uid) {
+            this.setState({ hasError: true })
+        } else {
+            this.setState({ hasError: false })
+            this.props.goNext();
+        }
+    }
     submitUser = () => {
         let isFormValid = true;
         let formToSubmit = {};
@@ -108,9 +118,13 @@ export default class LoginForm extends Component {
         }
         if (isFormValid) {
             if (this.state.type === 'Login') {
-                console.log("signin")
+                this.props.signIn(formToSubmit).then(() => {
+                    this.manageAccess()
+                })
             } else {
-                console.log("signup")
+                this.props.signUp(formToSubmit).then(() => {
+                    this.manageAccess()
+                })
             }
         } else {
             this.setState({
@@ -176,3 +190,14 @@ const styles = StyleSheet.create({
         fontFamily: 'Roboto-Black'
     }
 })
+
+const mapStateToProps = state => {
+    return {
+        User: state.User
+    }
+}
+const mapDispatchToProps = dispatch => {
+    return bindActionCreators({ signIn, signUp }, dispatch)
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm)

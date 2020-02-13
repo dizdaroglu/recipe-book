@@ -88,5 +88,5 @@ export default createAppContainer(createSwitchNavigator({
     Auth: AuthStack,
     Splash: SplashScreen
 }, {
-    initialRouteName: 'Splash'
+    initialRouteName: 'Auth'
 }))

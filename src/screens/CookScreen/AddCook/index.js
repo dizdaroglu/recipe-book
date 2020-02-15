@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import Input from '../../../utils/form/input';
 import ValidationRules from '../../../utils/form/validationRules';
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { addCook } from '../../../store/actions/cook_actions'
 
 
-
-export default class AddCook extends Component {
+class AddCook extends Component {
 
     state = {
         hasError: false,
@@ -237,3 +239,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     }
 })
+
+const mapStateToProps = state => {
+    return {
+        User: state.User,
+        Cook: state.Cook
+    }
+}
+const mapDispatchToProps = dispatch => {
+    return bindActionCreators({ addCook }, dispatch)
+}
+export default connect(mapStateToProps, mapDispatchToProps)(AddCook)

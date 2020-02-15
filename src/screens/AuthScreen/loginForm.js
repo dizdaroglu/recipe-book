@@ -5,6 +5,7 @@ import ValidationRules from '../../utils/form/validationRules';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { signIn, signUp } from '../../store/actions/user_actions';
+import { setTokens, getToken } from '../../utils/misc'
 
 class LoginForm extends Component {
 
@@ -95,8 +96,10 @@ class LoginForm extends Component {
         if (!this.props.User.userData.uid) {
             this.setState({ hasError: true })
         } else {
-            this.setState({ hasError: false })
-            this.props.goNext();
+            setTokens(this.props.User.userData, () => {
+                this.setState({ hasError: false })
+                this.props.goNext();
+            })
         }
     }
     submitUser = () => {
@@ -131,6 +134,11 @@ class LoginForm extends Component {
                 hasError: true
             })
         }
+    }
+    componentDidMount() {
+        getToken((values) => {
+            //  console.log(values)
+        })
     }
     render() {
         return (

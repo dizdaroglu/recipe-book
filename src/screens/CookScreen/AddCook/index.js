@@ -4,8 +4,9 @@ import Input from '../../../utils/form/input';
 import ValidationRules from '../../../utils/form/validationRules';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { addCook } from '../../../store/actions/cook_actions'
-
+import { autoSignIn } from '../../../store/actions/user_actions'
+import { addCook, resetCook } from '../../../store/actions/cook_actions'
+import { setTokens, getToken } from '../../../utils/misc'
 
 class AddCook extends Component {
 
@@ -82,7 +83,28 @@ class AddCook extends Component {
             this.setState({
                 loading: true
             })
-            console.log('ok')
+            getToken((value) => {
+                const dateNow = new Date();
+                const expiration = dateNow.getTime();
+                const form = {
+                    ...dataToSubmit,
+                    uid: value[3][1]
+                }
+
+                if (expiration > value[2][1]) {
+                    this.props.autoSignIn(value[1][1]).then(() => {
+                        setTokens(this.props.User.userData, () => {
+                            this.props.addCook(form, this.props.User.userData.token).then(() => {
+                                this.setState({ modalSuccess: true })
+                            })
+                        })
+                    })
+                } else {
+                    this.props.addCook(form, value[0][1]).then(() => {
+                        this.setState({ modalSuccess: true })
+                    })
+                }
+            })
         } else {
             let errorsArray = [];
             for (let key in formCopy) {
@@ -114,7 +136,20 @@ class AddCook extends Component {
             errorsArray: []
         })
     }
-
+    resetCookScreen = () => {
+        const formCopy = this.state.form;
+        for (let key in formCopy) {
+            formCopy[key].valid = false;
+            formCopy[key].value = "";
+        }
+        this.setState({
+            modalSuccess: false,
+            hasError: false,
+            errorsArray: [],
+            loading: false
+        })
+        this.props.resetCook()
+    }
     render() {
         return (
             <ScrollView>
@@ -183,6 +218,33 @@ class AddCook extends Component {
                             </TouchableOpacity>
                         </View>
                     </Modal>
+                    <Modal
+                        animationType="slide"
+                        visible={this.state.modalSuccess}
+                        onRequestClose={() => { }}
+                    >
+                        <View style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: 20
+                        }}>
+                            <Text >Added Recipe !!</Text>
+                            <TouchableOpacity
+                                style={{
+                                    padding: 10,
+                                    borderWidth: 1,
+                                    borderColor: '#C76361',
+                                    marginTop: 10
+                                }}
+                                onPress={() => {
+                                    this.resetCookScreen();
+                                    this.props.navigation.navigate('Home')
+                                }}>
+                                <Text style={{ color: '#C76361' }}>Go back home</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Modal>
                 </View>
             </ScrollView>
         );
@@ -247,6 +309,6 @@ const mapStateToProps = state => {
     }
 }
 const mapDispatchToProps = dispatch => {
-    return bindActionCreators({ addCook }, dispatch)
+    return bindActionCreators({ addCook, autoSignIn, resetCook }, dispatch)
 }
 export default connect(mapStateToProps, mapDispatchToProps)(AddCook)

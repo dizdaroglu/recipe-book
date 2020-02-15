@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
 import HorizontalScroll from './horizontal_scrol_icon';
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { getCook } from '../../store/actions/cook_actions'
 
 const data = [
     { key: "salad" },
@@ -11,7 +14,7 @@ const data = [
     { key: "desert4" },
 
 ]
-export default class HomeScreen extends Component {
+class HomeScreen extends Component {
 
     state = {
         categories: ['All', 'Salad', 'Soup', 'Desert', 'Chicken'],
@@ -20,22 +23,38 @@ export default class HomeScreen extends Component {
         loading: true
     }
     updateCategoryHandler = (value) => {
+        console.log("Value: ", value)
         this.setState({
             loading: true,
             recipe: [],
             categorySelected: value
         })
-
+        this.props.getCook(value).then(() => {
+            this.setState({
+                loading: false,
+                recipe: this.props.Cook.list
+            })
+        })
     }
     renderItem = ({ item, index }) => {
 
         return (
             <View style={styles.itemContainer}>
                 <View style={styles.itemTextContainer}>
-                    <Text style={styles.itemText}>{item.key}</Text>
+                    <Text style={styles.itemText}>{item.title}</Text>
                 </View>
             </View>
         )
+    }
+
+    componentDidMount() {
+        this.props.getCook("All").then(() => {
+
+            this.setState({
+                loading: false,
+                recipe: this.props.Cook.list
+            })
+        })
     }
     render() {
         return (
@@ -48,7 +67,7 @@ export default class HomeScreen extends Component {
                     />
                     <View style={styles.recipeContainer}>
                         <FlatList
-                            data={data}
+                            data={this.state.recipe}
                             renderItem={this.renderItem}
                             numColumns={2}
                         />
@@ -84,3 +103,12 @@ const styles = StyleSheet.create({
         color: '#C76361'
     }
 })
+const mapStateToProps = state => {
+    return {
+        Cook: state.Cook
+    }
+}
+const mapDispatchToProps = dispatch => {
+    return bindActionCreators({ getCook }, dispatch)
+}
+export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen)
